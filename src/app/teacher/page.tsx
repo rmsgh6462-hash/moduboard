@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AppHeader } from "@/components/app-header";
+import { AppShell } from "@/components/app-shell";
 import { BoardCreatePanel } from "@/components/teacher/board-create-panel";
 import { CreateGroupForm } from "@/components/teacher/create-group-form";
 import { StudentRosterPanel } from "@/components/teacher/student-roster-panel";
@@ -38,8 +38,7 @@ export default async function TeacherPage() {
     group != null ? `g${group.grade}c${group.class_num}` : "modo52";
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <AppHeader name={profile.name} roleLabel="교사" />
+    <AppShell name={profile.name} role="teacher">
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-6 pb-[calc(2rem+var(--safe-bottom))]">
         <div>
@@ -72,10 +71,10 @@ export default async function TeacherPage() {
               students={students}
               suggestedCode={suggestedCode}
             />
-            <BoardCreatePanel boards={boards} />
+            <BoardCreatePanel boards={boards} students={students} />
           </>
         ) : null}
       </main>
-    </div>
+    </AppShell>
   );
 }

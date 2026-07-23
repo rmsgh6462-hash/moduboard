@@ -27,6 +27,20 @@ export type Board = {
   group_id: string;
   created_by: string;
   created_at: string;
+  description: string;
+  layout: "brick" | "column";
+  sort_order: "oldest" | "newest";
+  is_locked: boolean;
+  is_hidden: boolean;
+  audience_ids: string[];
+  allow_video: boolean;
+  allow_pdf: boolean;
+  allow_hwp: boolean;
+  allow_image: boolean;
+  allow_comments: boolean;
+  allow_likes: boolean;
+  background: string;
+  thumbnail_url: string | null;
 };
 
 export type Post = {
@@ -111,6 +125,20 @@ type Tables = {
       group_id: string;
       created_by: string;
       created_at?: string;
+      description?: string;
+      layout?: "brick" | "column";
+      sort_order?: "oldest" | "newest";
+      is_locked?: boolean;
+      is_hidden?: boolean;
+      audience_ids?: string[];
+      allow_video?: boolean;
+      allow_pdf?: boolean;
+      allow_hwp?: boolean;
+      allow_image?: boolean;
+      allow_comments?: boolean;
+      allow_likes?: boolean;
+      background?: string;
+      thumbnail_url?: string | null;
     };
     Update: {
       id?: string;
@@ -118,6 +146,20 @@ type Tables = {
       group_id?: string;
       created_by?: string;
       created_at?: string;
+      description?: string;
+      layout?: "brick" | "column";
+      sort_order?: "oldest" | "newest";
+      is_locked?: boolean;
+      is_hidden?: boolean;
+      audience_ids?: string[];
+      allow_video?: boolean;
+      allow_pdf?: boolean;
+      allow_hwp?: boolean;
+      allow_image?: boolean;
+      allow_comments?: boolean;
+      allow_likes?: boolean;
+      background?: string;
+      thumbnail_url?: string | null;
     };
     Relationships: [
       {

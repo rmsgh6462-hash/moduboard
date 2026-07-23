@@ -4,6 +4,7 @@ import { useActionState, useTransition } from "react";
 import { Loader2, Trash2, Users } from "lucide-react";
 import {
   bulkCreateStudentsAction,
+  createStudentAction,
   deleteStudentAction,
 } from "@/app/actions/students";
 import type { ActionResult } from "@/app/actions/auth";
@@ -22,6 +23,7 @@ export function StudentRosterPanel({ students, suggestedCode }: Props) {
     initial,
   );
   const [isPending, startTransition] = useTransition();
+  const [singleState, singleAction, singlePending] = useActionState(createStudentAction, initial);
 
   return (
     <section className="flex flex-col gap-4 rounded-2xl border border-border bg-surface p-5">
@@ -30,7 +32,17 @@ export function StudentRosterPanel({ students, suggestedCode }: Props) {
         <h2 className="text-lg font-semibold">학생 명단 일괄 등록</h2>
       </div>
 
-      <form action={formAction} className="flex flex-col gap-4">
+      <form action={singleAction} className="grid gap-3 rounded-2xl bg-background p-4 sm:grid-cols-2">
+        <h3 className="font-semibold sm:col-span-2">??? ???????? ?? ??</h3>
+        <input name="studentNum" type="number" min="1" required placeholder="??" className="touch-target rounded-xl border border-border px-4" />
+        <input name="name" required placeholder="?? ??" className="touch-target rounded-xl border border-border px-4" />
+        <input name="loginId" required placeholder="??? ???" className="touch-target rounded-xl border border-border px-4" />
+        <input name="password" required placeholder="??? ????" className="touch-target rounded-xl border border-border px-4" />
+        <button disabled={singlePending} className="touch-target rounded-xl bg-brand font-semibold text-white sm:col-span-2">{singlePending?"?? ??":"?? ?? ???"}</button>
+        {singleState.message?<p className={singleState.ok?"text-sm text-brand sm:col-span-2":"text-sm text-red-600 sm:col-span-2"}>{singleState.message}</p>:null}
+      </form>
+      <details className="rounded-2xl border border-border p-4"><summary className="cursor-pointer font-semibold">?? ?? ?? ??</summary>
+      <form action={formAction} className="mt-4 flex flex-col gap-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">학급 코드</span>
@@ -91,7 +103,7 @@ export function StudentRosterPanel({ students, suggestedCode }: Props) {
           ) : null}
           학생 계정 일괄 생성
         </button>
-      </form>
+      </form></details>
 
       <div className="border-t border-border pt-4">
         <h3 className="mb-3 text-sm font-semibold text-muted">

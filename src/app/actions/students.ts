@@ -116,6 +116,22 @@ export async function bulkCreateStudentsAction(
   return { ok: true, message: summary };
 }
 
+
+export async function createStudentAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const profile = await requireTeacher(); const groupId = profile.group_id ?? profile.group?.id;
+  if (!groupId) return { ok:false, message:"?? ??? ??? ???." };
+  const loginId=String(formData.get("loginId")??"").trim().toLowerCase(), password=String(formData.get("password")??""), name=String(formData.get("name")??"").trim(), studentNum=Number(formData.get("studentNum"));
+  if(!/^[a-z0-9._-]{3,24}$/.test(loginId)) return {ok:false,message:"???? ?? ?????? 3~24?? ??? ???."};
+  if(password.length<4) return {ok:false,message:"????? 4? ????? ???."};
+  if(!name||!Number.isInteger(studentNum)||studentNum<1) return {ok:false,message:"??? ??? ??? ???."};
+  let admin; try{admin=createAdminClient()}catch(error){return {ok:false,message:error instanceof Error?error.message:"??? ?? ??"}}
+  const {data,error}=await admin.auth.admin.createUser({email:toAuthEmail(loginId),password,email_confirm:true,user_metadata:{name,role:"student",login_id:loginId}});
+  if(error||!data.user)return {ok:false,message:error?.message??"?? ?? ??"};
+  const {error:profileError}=await admin.from("users").insert({id:data.user.id,role:"student",group_id:groupId,student_num:studentNum,name,gender:"other",login_id:loginId});
+  if(profileError){await admin.auth.admin.deleteUser(data.user.id);return {ok:false,message:profileError.message}}
+  revalidatePath("/teacher"); return {ok:true,message:name+" ?? ??? ??????."};
+}
+
 export async function deleteStudentAction(
   studentId: string,
 ): Promise<ActionResult> {

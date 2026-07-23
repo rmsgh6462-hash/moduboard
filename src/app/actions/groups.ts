@@ -83,6 +83,7 @@ export async function createBoardAction(
 ): Promise<ActionResult> {
   const profile = await requireTeacher();
   const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
 
   if (!title) {
     return { ok: false, message: "보드 제목을 입력해 주세요." };
@@ -100,6 +101,19 @@ export async function createBoardAction(
       title,
       group_id: groupId,
       created_by: profile.id,
+      description,
+      layout: formData.get("layout") === "column" ? "column" : "brick",
+      sort_order: formData.get("sortOrder") === "oldest" ? "oldest" : "newest",
+      is_locked: formData.get("isLocked") === "on",
+      is_hidden: formData.get("isHidden") === "on",
+      audience_ids: formData.getAll("audienceIds").map(String),
+      allow_video: formData.get("allowVideo") === "on",
+      allow_pdf: formData.get("allowPdf") === "on",
+      allow_hwp: formData.get("allowHwp") === "on",
+      allow_image: formData.get("allowImage") === "on",
+      allow_comments: formData.get("allowComments") === "on",
+      allow_likes: formData.get("allowLikes") === "on",
+      background: String(formData.get("background") ?? "mint"),
     })
     .select("id")
     .single();
