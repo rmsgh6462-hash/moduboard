@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { BoardCanvas } from "@/components/board/board-canvas";
 import { BoardToolbar } from "@/components/board/board-toolbar";
+import { ColumnBoard } from "@/components/board/column-board";
 import { requireProfile } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -37,24 +38,21 @@ export default async function BoardPage({ params }: PageProps) {
     redirect("/boards");
   }
 
-  const { data: posts } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("board_id", boardId)
-    .order("created_at", { ascending: true });
+  const [{ data: posts }, { data: columns }] = await Promise.all([
+    supabase.from("posts").select("*").eq("board_id", boardId).order("created_at", { ascending: board.sort_order === "oldest" }),
+    supabase.from("board_columns").select("*").eq("board_id", boardId).order("position", { ascending: true }),
+  ]);
 
   const subtitle = `${group.school_name} ${group.grade}학년 ${group.class_num}반 · ${profile.name}`;
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <BoardToolbar title={board.title} subtitle={subtitle} />
-      <BoardCanvas
-        boardId={board.id}
-        boardTitle={board.title}
-        group={group}
-        profile={profile}
-        initialPosts={posts ?? []}
-      />
+      {board.layout === "column" ? (
+        <ColumnBoard board={board} group={group} profile={profile} columns={columns ?? []} initialPosts={posts ?? []} />
+      ) : (
+        <BoardCanvas boardId={board.id} boardTitle={board.title} group={group} profile={profile} initialPosts={posts ?? []} />
+      )}
     </div>
   );
 }

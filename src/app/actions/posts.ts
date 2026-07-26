@@ -52,6 +52,11 @@ async function getBoardContext(boardId: string) {
 export async function createPostAction(input: {
   boardId: string;
   content: string;
+  title?: string;
+  columnId?: string | null;
+  attachmentUrl?: string | null;
+  attachmentName?: string | null;
+  attachmentType?: string | null;
   color?: string;
   imageUrl?: string | null;
   xPos?: number;
@@ -63,7 +68,7 @@ export async function createPostAction(input: {
   }
 
   const content = input.content.trim();
-  if (!content && !input.imageUrl) {
+  if (!content && !input.imageUrl && !input.attachmentUrl) {
     return { ok: false, message: "내용 또는 사진을 추가해 주세요." };
   }
 
@@ -78,6 +83,11 @@ export async function createPostAction(input: {
       user_id: ctx.profile.id,
       author_name: ctx.profile.name,
       content,
+      title: input.title?.trim() ?? "",
+      column_id: input.columnId ?? null,
+      attachment_url: input.attachmentUrl ?? null,
+      attachment_name: input.attachmentName ?? null,
+      attachment_type: input.attachmentType ?? null,
       image_url: input.imageUrl ?? null,
       color: input.color ?? DEFAULT_POST_COLOR,
       x_pos: Math.max(0, Math.round(xPos)),

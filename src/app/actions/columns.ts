@@ -1,0 +1,7 @@
+﻿"use server";
+import { revalidatePath } from "next/cache";
+import { requireTeacher } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
+import type { ActionResult } from "@/app/actions/auth";
+export async function createBoardColumnAction(input:{boardId:string;title:string}):Promise<ActionResult>{const profile=await requireTeacher();const title=input.title.trim();if(!title)return{ok:false,message:"기둥 제목을 입력해 주세요."};const supabase=await createClient();const{data:board}=await supabase.from("boards").select("group_id,layout").eq("id",input.boardId).maybeSingle();if(!board||board.layout!=="column")return{ok:false,message:"기둥형 보드가 아닙니다."};const{data:last}=await supabase.from("board_columns").select("position").eq("board_id",input.boardId).order("position",{ascending:false}).limit(1).maybeSingle();const{error}=await supabase.from("board_columns").insert({board_id:input.boardId,title,position:(last?.position??-1)+1,created_by:profile.id});if(error)return{ok:false,message:error.message};revalidatePath(`/board/${input.boardId}`);return{ok:true,message:"기둥을 만들었습니다."}}
+export async function deleteBoardColumnAction(input:{boardId:string;columnId:string}):Promise<ActionResult>{await requireTeacher();const supabase=await createClient();const{error}=await supabase.from("board_columns").delete().eq("id",input.columnId).eq("board_id",input.boardId);if(error)return{ok:false,message:error.message};revalidatePath(`/board/${input.boardId}`);return{ok:true}}

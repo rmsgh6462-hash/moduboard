@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useTransition } from "react";
 import { Loader2, Trash2, Users } from "lucide-react";
@@ -33,15 +33,15 @@ export function StudentRosterPanel({ students, suggestedCode }: Props) {
       </div>
 
       <form action={singleAction} className="grid gap-3 rounded-2xl bg-background p-4 sm:grid-cols-2">
-        <h3 className="font-semibold sm:col-span-2">??? ???????? ?? ??</h3>
-        <input name="studentNum" type="number" min="1" required placeholder="??" className="touch-target rounded-xl border border-border px-4" />
-        <input name="name" required placeholder="?? ??" className="touch-target rounded-xl border border-border px-4" />
-        <input name="loginId" required placeholder="??? ???" className="touch-target rounded-xl border border-border px-4" />
-        <input name="password" required placeholder="??? ????" className="touch-target rounded-xl border border-border px-4" />
-        <button disabled={singlePending} className="touch-target rounded-xl bg-brand font-semibold text-white sm:col-span-2">{singlePending?"?? ??":"?? ?? ???"}</button>
+        <h3 className="font-semibold sm:col-span-2">학생별 아이디·비밀번호 직접 생성</h3>
+        <input name="studentNum" type="number" min="1" required placeholder="번호" className="touch-target rounded-xl border border-border px-4" />
+        <input name="name" required placeholder="학생 이름" className="touch-target rounded-xl border border-border px-4" />
+        <input name="loginId" required placeholder="로그인 아이디" className="touch-target rounded-xl border border-border px-4" />
+        <input name="password" required placeholder="로그인 비밀번호" className="touch-target rounded-xl border border-border px-4" />
+        <button disabled={singlePending} className="touch-target rounded-xl bg-brand font-semibold text-white sm:col-span-2">{singlePending?"생성 중…":"학생 계정 만들기"}</button>
         {singleState.message?<p className={singleState.ok?"text-sm text-brand sm:col-span-2":"text-sm text-red-600 sm:col-span-2"}>{singleState.message}</p>:null}
       </form>
-      <details className="rounded-2xl border border-border p-4"><summary className="cursor-pointer font-semibold">?? ?? ?? ??</summary>
+      <details className="rounded-2xl border border-border p-4"><summary className="cursor-pointer font-semibold">여러 학생 일괄 등록</summary>
       <form action={formAction} className="mt-4 flex flex-col gap-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5">

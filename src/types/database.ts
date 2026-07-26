@@ -54,6 +54,15 @@ export type Post = {
   x_pos: number;
   y_pos: number;
   created_at: string;
+  title: string;
+  column_id: string | null;
+  attachment_url: string | null;
+  attachment_name: string | null;
+  attachment_type: string | null;
+};
+
+export type BoardColumn = {
+  id: string; board_id: string; title: string; position: number; created_by: string; created_at: string;
 };
 
 type Tables = {
@@ -178,6 +187,12 @@ type Tables = {
       },
     ];
   };
+  board_columns: {
+    Row: BoardColumn;
+    Insert: { id?: string; board_id: string; title: string; position?: number; created_by: string; created_at?: string };
+    Update: { id?: string; board_id?: string; title?: string; position?: number; created_by?: string; created_at?: string };
+    Relationships: [{ foreignKeyName: "board_columns_board_id_fkey"; columns: ["board_id"]; isOneToOne: false; referencedRelation: "boards"; referencedColumns: ["id"] }];
+  };
   posts: {
     Row: Post;
     Insert: {
@@ -191,6 +206,11 @@ type Tables = {
       x_pos?: number;
       y_pos?: number;
       created_at?: string;
+      title?: string;
+      column_id?: string | null;
+      attachment_url?: string | null;
+      attachment_name?: string | null;
+      attachment_type?: string | null;
     };
     Update: {
       id?: string;
@@ -203,6 +223,11 @@ type Tables = {
       x_pos?: number;
       y_pos?: number;
       created_at?: string;
+      title?: string;
+      column_id?: string | null;
+      attachment_url?: string | null;
+      attachment_name?: string | null;
+      attachment_type?: string | null;
     };
     Relationships: [
       {

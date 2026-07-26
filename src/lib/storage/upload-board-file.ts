@@ -1,0 +1,3 @@
+﻿"use client";
+import { createClient } from "@/lib/supabase/client";
+export async function uploadBoardFile({file,groupId,boardId,userId}:{file:File;groupId:string;boardId:string;userId:string}){if(file.size>20*1024*1024)return{error:"첨부파일은 20MB 이하만 가능합니다."};const ext=file.name.split(".").pop()?.replace(/[^a-zA-Z0-9]/g,"")||"file";const path=`${groupId}/${boardId}/${userId}-${Date.now()}-${crypto.randomUUID()}.${ext}`;const supabase=createClient();const{error}=await supabase.storage.from("board-files").upload(path,file,{contentType:file.type||"application/octet-stream",upsert:false});if(error)return{error:error.message};return{publicUrl:supabase.storage.from("board-files").getPublicUrl(path).data.publicUrl,name:file.name,type:file.type||"application/octet-stream"}}

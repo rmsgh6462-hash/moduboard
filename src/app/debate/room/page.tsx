@@ -1,0 +1,1 @@
+﻿import { AppShell } from "@/components/app-shell";import { DebateRoom } from "@/components/debate-room";import { requireProfile } from "@/lib/auth/session";export default async function Page(){const p=await requireProfile();return <AppShell name={p.name} role={p.role}><DebateRoom name={p.name} role={p.role}/></AppShell>}
