@@ -16,7 +16,10 @@ function timeAgo(value: string) {
 
 export function ModernPostCard({ post, onOpen }: Props) {
   const [liked, setLiked] = useState(false);
-  const imageUrl = post.image_url || (post.attachment_type?.startsWith("image/") ? post.attachment_url : null);
+  const isVisualAttachment = post.media_type === "image" || post.media_type === "video" || post.media_type === "mindmap" || post.attachment_type?.startsWith("image/") || post.attachment_type?.startsWith("video/");
+  const mediaUrl = post.image_url || (isVisualAttachment ? post.attachment_url : null);
+  const mediaType = post.media_type || (post.attachment_type?.startsWith("video/") ? "video" : mediaUrl ? "image" : null);
+  const media = mediaUrl ? (mediaType === "video" ? <video src={mediaUrl} controls onClick={e=>e.stopPropagation()} /> : <img src={mediaUrl} alt={mediaType === "mindmap" ? "첨부한 생각 그물" : post.attachment_name || "첨부 이미지"} />) : null;
   return (
     <article className="modern-post-card" style={{ backgroundColor: post.color || "#fff" }}>
       <header className="modern-post-header">
@@ -25,10 +28,11 @@ export function ModernPostCard({ post, onOpen }: Props) {
         <button type="button" onClick={() => onOpen?.(post)} aria-label={`${post.author_name} 게시글 더보기`}><MoreHorizontal /></button>
       </header>
       <button type="button" className="modern-post-body" onClick={() => onOpen?.(post)}>
+        {post.media_position === "top" ? media : null}
         {post.title ? <h3>{post.title}</h3> : null}
         {post.content ? <p>{post.content}</p> : null}
-        {imageUrl ? <img src={imageUrl} alt={post.attachment_name || "첨부 이미지"} /> : null}
-        {post.attachment_url && !imageUrl ? <a href={post.attachment_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}><FileText /><span>{post.attachment_name || "첨부파일 열기"}</span></a> : null}
+        {post.media_position !== "top" ? media : null}
+        {post.attachment_url && !mediaUrl ? <a href={post.attachment_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}><FileText /><span>{post.attachment_name || "첨부파일 열기"}</span></a> : null}
       </button>
       <footer className="modern-post-footer">
         <button type="button" className={liked ? "liked" : ""} onClick={() => setLiked(!liked)} aria-label="공감"><Heart /> <span>{liked ? 1 : 0}</span></button>

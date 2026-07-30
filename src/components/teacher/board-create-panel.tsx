@@ -1,4 +1,31 @@
-﻿"use client";
-import { useActionState,useState } from "react";import Link from "next/link";import { ChevronDown,LayoutGrid,Loader2,Plus,Settings2 } from "lucide-react";import { createBoardAction } from "@/app/actions/groups";import type { ActionResult } from "@/app/actions/auth";import type { Board,UserProfile } from "@/types/database";
-const initial:ActionResult={ok:false};const toggles=[["allowImage","이미지 첨부"],["allowVideo","동영상 첨부"],["allowPdf","PDF 첨부"],["allowHwp","한글 파일 첨부"],["allowComments","댓글"],["allowLikes","좋아요"],["isLocked","보드 잠금"],["isHidden","보드 숨기기"]];
-export function BoardCreatePanel({boards,students=[]}:{boards:Board[];students?:UserProfile[]}){const[state,action,pending]=useActionState(createBoardAction,initial);const[open,setOpen]=useState(false);return <section id="boards" className="teacher-card"><div className="section-title"><div className="icon-box"><LayoutGrid/></div><div><h2>우리 반 보드</h2><p>수업 목적에 맞는 보드를 자유롭게 만드세요.</p></div><button className="primary-button" onClick={()=>setOpen(!open)}><Plus/>보드 추가</button></div>{open?<form action={action} className="board-builder"><div className="form-grid"><label>보드 이름<input name="title" required placeholder="예: 오늘의 생각 나누기"/></label><label>보드 설명<input name="description" placeholder="보드의 활동 내용을 소개해 주세요"/></label><label>레이아웃<select name="layout"><option value="brick">벽돌형 · 반응형 Masonry 배치</option><option value="column">기둥형 · 섹션별 세로 스크롤</option></select></label><label>정렬<select name="sortOrder"><option value="newest">새 글이 위로</option><option value="oldest">쓴 순서대로</option></select></label><label>배경<select name="background"><option value="mint">민트 가든</option><option value="lavender">라벤더 드림</option><option value="peach">피치 선셋</option><option value="sky">클리어 스카이</option></select></label></div><div className="setting-group"><b><Settings2/>기능 설정</b><div className="toggle-grid">{toggles.map(([name,label])=><label className="toggle-item" key={name}><span>{label}</span><input type="checkbox" name={name} defaultChecked={!name.startsWith("is")}/></label>)}</div></div>{students.length?<details className="audience"><summary>공개 대상 선택 <ChevronDown/></summary><p>선택하지 않으면 모든 학생에게 보입니다.</p><div>{students.map(s=><label key={s.id}><input type="checkbox" name="audienceIds" value={s.id}/>{s.student_num}번 {s.name}</label>)}</div></details>:null}<button disabled={pending} className="primary-button submit-board">{pending?<Loader2 className="animate-spin"/>:<Plus/>}보드 만들기</button>{state.message?<p className={state.ok?"form-success":"form-error"}>{state.message}</p>:null}</form>:null}<div className="compact-board-list">{boards.map(b=><Link key={b.id} href={`/board/${b.id}`}><span className={`mini-cover ${b.background}`}/><div><b>{b.title}</b><small>{b.layout==="column"?"기둥형":"벽돌형"}</small></div><span>열기</span></Link>)}</div></section>}
+"use client";
+import { useActionState, useState } from "react";
+import Link from "next/link";
+import { ChevronDown, LayoutGrid, Loader2, Plus, Settings2 } from "lucide-react";
+import { createBoardAction } from "@/app/actions/groups";
+import type { ActionResult } from "@/app/actions/auth";
+import type { Board, UserProfile } from "@/types/database";
+
+const initial: ActionResult = { ok: false };
+const toggles = [["allowImage","이미지 첨부"],["allowVideo","동영상 첨부"],["allowPdf","PDF 첨부"],["allowHwp","한글 파일 첨부"],["allowComments","댓글"],["allowLikes","좋아요"],["isLocked","보드 잠금"],["isHidden","보드 숨기기"]];
+
+export function BoardCreatePanel({ boards, students = [] }: { boards: Board[]; students?: UserProfile[] }) {
+  const [state, action, pending] = useActionState(createBoardAction, initial);
+  const [open, setOpen] = useState(false);
+  return <section id="boards" className="teacher-card">
+    <div className="section-title"><div className="icon-box"><LayoutGrid /></div><div><h2>우리 반 보드</h2><p>수업 목적에 맞는 보드를 자유롭게 만드세요.</p></div><button className="primary-button" onClick={() => setOpen(!open)}><Plus />보드 추가</button></div>
+    {open ? <form action={action} className="board-builder">
+      <div className="form-grid">
+        <label>보드 이름<input name="title" required placeholder="예: 오늘의 생각 나누기" /></label>
+        <label>보드 설명<input name="description" placeholder="보드의 활동 내용을 소개해 주세요" /></label>
+        <label>레이아웃<select name="layout"><option value="brick">벽돌형 · 반응형 Masonry 배치</option><option value="column">기둥형 · 섹션별 세로 스크롤</option><option value="mindmap">생각 그물 · 가지로 아이디어 연결</option></select></label>
+        <label>정렬<select name="sortOrder"><option value="newest">새 글이 위로</option><option value="oldest">쓴 순서대로</option></select></label>
+        <label>배경<select name="background"><option value="mint">민트 가든</option><option value="lavender">라벤더 드림</option><option value="peach">피치 선셋</option><option value="sky">클리어 스카이</option></select></label>
+      </div>
+      <div className="setting-group"><b><Settings2 />기능 설정</b><div className="toggle-grid">{toggles.map(([name,label]) => <label className="toggle-item" key={name}><span>{label}</span><input type="checkbox" name={name} defaultChecked={!name.startsWith("is")} /></label>)}</div></div>
+      {students.length ? <details className="audience"><summary>공개 대상 선택 <ChevronDown /></summary><p>선택하지 않으면 모든 학생에게 보입니다.</p><div>{students.map(s => <label key={s.id}><input type="checkbox" name="audienceIds" value={s.id} />{s.student_num}번 {s.name}</label>)}</div></details> : null}
+      <button disabled={pending} className="primary-button submit-board">{pending ? <Loader2 className="animate-spin" /> : <Plus />}보드 만들기</button>{state.message ? <p className={state.ok ? "form-success" : "form-error"}>{state.message}</p> : null}
+    </form> : null}
+    <div className="compact-board-list">{boards.map(b => <Link key={b.id} href={`/board/${b.id}`}><span className={`mini-cover ${b.background}`} /><div><b>{b.title}</b><small>{b.layout === "column" ? "기둥형" : b.layout === "mindmap" ? "생각 그물" : "벽돌형"}</small></div><span>열기</span></Link>)}</div>
+  </section>;
+}

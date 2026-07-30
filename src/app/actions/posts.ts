@@ -57,6 +57,8 @@ export async function createPostAction(input: {
   attachmentUrl?: string | null;
   attachmentName?: string | null;
   attachmentType?: string | null;
+  mediaType?: "image" | "video" | "mindmap" | null;
+  mediaPosition?: "top" | "bottom";
   color?: string;
   imageUrl?: string | null;
   xPos?: number;
@@ -88,6 +90,8 @@ export async function createPostAction(input: {
       attachment_url: input.attachmentUrl ?? null,
       attachment_name: input.attachmentName ?? null,
       attachment_type: input.attachmentType ?? null,
+      media_type: input.mediaType ?? (input.imageUrl ? "image" : null),
+      media_position: input.mediaPosition ?? "bottom",
       image_url: input.imageUrl ?? null,
       color: input.color ?? DEFAULT_POST_COLOR,
       x_pos: Math.max(0, Math.round(xPos)),
@@ -111,6 +115,8 @@ export async function updatePostAction(input: {
   title?: string;
   color: string;
   imageUrl?: string | null;
+  mediaType?: "image" | "video" | "mindmap" | null;
+  mediaPosition?: "top" | "bottom";
 }): Promise<ActionResult & { post?: Post }> {
   const ctx = await getBoardContext(input.boardId);
   if (ctx.error || !ctx.board) {
@@ -144,6 +150,8 @@ export async function updatePostAction(input: {
       title: input.title?.trim() ?? existing.title ?? "",
       color: input.color,
       image_url: input.imageUrl ?? null,
+      media_type: input.mediaType ?? null,
+      media_position: input.mediaPosition ?? "bottom",
     })
     .eq("id", input.postId)
     .select("*")

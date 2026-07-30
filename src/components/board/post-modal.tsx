@@ -8,7 +8,7 @@ import {
   updatePostAction,
 } from "@/app/actions/posts";
 import { POST_COLORS } from "@/lib/constants";
-import { uploadBoardImage } from "@/lib/storage/upload-board-image";
+import { uploadBoardFile } from "@/lib/storage/upload-board-file";
 import type { Post } from "@/types/database";
 
 type Props = {
@@ -22,6 +22,7 @@ type Props = {
   canDelete: boolean;
   initialX?: number;
   initialY?: number;
+  initialMedia?: { url: string; type: "image" | "video" | "mindmap"; name?: string } | null;
   onClose: () => void;
   onSaved: (post: Post) => void;
   onDeleted: (postId: string) => void;
@@ -38,6 +39,7 @@ export function PostModal({
   canDelete,
   initialX,
   initialY,
+  initialMedia,
   onClose,
   onSaved,
   onDeleted,
@@ -49,6 +51,9 @@ export function PostModal({
   const [content, setContent] = useState("");
   const [color, setColor] = useState<string>(POST_COLORS[0]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<"image" | "video" | "mindmap" | null>(null);
+  const [mediaPosition, setMediaPosition] = useState<"top" | "bottom">("bottom");
+  const [mediaName, setMediaName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -62,14 +67,20 @@ export function PostModal({
       setTitle(post.title ?? "");
       setContent(post.content);
       setColor(post.color);
-      setImageUrl(post.image_url);
+      setImageUrl(post.image_url || post.attachment_url);
+      setMediaType(post.media_type || (post.attachment_type?.startsWith("video/") ? "video" : post.image_url || post.attachment_url ? "image" : null));
+      setMediaPosition(post.media_position || "bottom");
+      setMediaName(post.attachment_name);
     } else {
       setTitle("");
       setContent("");
       setColor(POST_COLORS[Math.floor(Math.random() * POST_COLORS.length)]);
-      setImageUrl(null);
+      setImageUrl(initialMedia?.url ?? null);
+      setMediaType(initialMedia?.type ?? null);
+      setMediaName(initialMedia?.name ?? null);
+      setMediaPosition("bottom");
     }
-  }, [open, post]);
+  }, [open, post, initialMedia]);
 
   if (!open) return null;
 
@@ -77,7 +88,7 @@ export function PostModal({
     if (!file || readOnly) return;
     setUploading(true);
     setError(null);
-    const result = await uploadBoardImage({
+    const result = await uploadBoardFile({
       file,
       groupId,
       boardId,
@@ -85,10 +96,12 @@ export function PostModal({
     });
     setUploading(false);
     if ("error" in result) {
-      setError(result.error);
+      setError(result.error ?? "첨부파일 업로드에 실패했습니다.");
       return;
     }
     setImageUrl(result.publicUrl);
+    setMediaType(file.type.startsWith("video/") ? "video" : "image");
+    setMediaName(result.name);
   }
 
   function handleSave() {
@@ -102,6 +115,10 @@ export function PostModal({
           content,
           color,
           imageUrl,
+          mediaType,
+          mediaPosition,
+          attachmentName: mediaName,
+          attachmentType: mediaType === "video" ? "video/mp4" : mediaType ? "image/png" : null,
           xPos: initialX,
           yPos: initialY,
         });
@@ -122,6 +139,8 @@ export function PostModal({
           content,
         color,
         imageUrl,
+        mediaType,
+        mediaPosition,
       });
       if (!result.ok || !result.post) {
         setError(result.message ?? "수정에 실패했습니다.");
@@ -232,22 +251,21 @@ export function PostModal({
           ) : null}
 
           <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium">사진</span>
+            <span className="text-sm font-medium">첨부 매체</span>
             {imageUrl ? (
               <div className="relative overflow-hidden rounded-2xl border border-border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                {mediaType === "video" ? <video src={imageUrl} controls className="max-h-56 w-full bg-black object-contain" /> : <img
                   src={imageUrl}
-                  alt="첨부 사진"
-                  className="max-h-56 w-full object-cover"
-                />
+                  alt={mediaType === "mindmap" ? "첨부한 생각 그물" : "첨부 사진"}
+                  className="max-h-56 w-full object-contain"
+                />}
                 {!readOnly ? (
                   <button
                     type="button"
-                    onClick={() => setImageUrl(null)}
+                    onClick={() => { setImageUrl(null); setMediaType(null); setMediaName(null); }}
                     className="absolute right-2 top-2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white"
                   >
-                    사진 제거
+                    첨부 제거
                   </button>
                 ) : null}
               </div>
@@ -271,12 +289,12 @@ export function PostModal({
                   className="touch-target inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-background text-sm font-semibold"
                 >
                   <ImagePlus className="size-4" aria-hidden />
-                  갤러리
+                  이미지 · 동영상
                 </button>
                 <input
                   ref={cameraInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,video/*"
                   capture="environment"
                   className="hidden"
                   onChange={(e) => {
@@ -299,10 +317,12 @@ export function PostModal({
             {uploading ? (
               <p className="flex items-center gap-2 text-sm text-muted">
                 <Loader2 className="size-4 animate-spin" aria-hidden />
-                사진 업로드 중…
+                첨부파일 업로드 중…
               </p>
             ) : null}
           </div>
+
+          {imageUrl ? <fieldset className="rounded-2xl border border-border p-3"><legend className="px-1 text-sm font-medium">매체 배치 위치</legend><div className="grid grid-cols-2 gap-2">{([['top','글 위에 배치'],['bottom','글 아래에 배치']] as const).map(([value,label])=><label key={value} className={`cursor-pointer rounded-xl border px-3 py-2 text-center text-sm ${mediaPosition===value?'border-brand bg-indigo-50 font-bold text-brand':'border-border'}`}><input className="sr-only" type="radio" name="mediaPosition" value={value} checked={mediaPosition===value} disabled={readOnly} onChange={()=>setMediaPosition(value)}/>{label}</label>)}</div></fieldset> : null}
 
           {error ? (
             <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">

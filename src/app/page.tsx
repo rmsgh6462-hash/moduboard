@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Bell, CalendarDays, CheckCircle2, Clock3, LayoutGrid, Lightbulb, LogIn, MessageSquareText, Sparkles, Vote } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
 import { getCurrentProfile } from "@/lib/auth/session";
+import { ReorderableFeatureGrid } from "@/components/reorderable-feature-grid";
 
 const features = [
   { href: "/boards", icon: LayoutGrid, emoji: "📌", title: "모두의 게시판", description: "기둥형·벽돌형 포스트잇에 생각을 자유롭게 붙여요.", tone: "mint" },
@@ -36,7 +37,7 @@ export default async function Home() {
 
       <section className="dashboard-section">
         <div className="dashboard-title"><div><span>EXPLORE TOGETHER</span><h2>오늘은 무엇을 해볼까요? 🚀</h2></div><p>카드를 눌러 바로 참여해 보세요.</p></div>
-        <div className="feature-grid">{features.map(({ href, icon: Icon, emoji, title, description, tone }) => <Link key={href} href={href} className={`feature-entry ${tone} bounce-hover`}><div className="feature-icon"><Icon /><span>{emoji}</span></div><div><h3>{title}</h3><p>{description}</p></div><span className="feature-arrow"><ArrowRight /></span></Link>)}</div>
+        <ReorderableFeatureGrid isTeacher={profile?.role === "teacher"} />
       </section>
 
       <section className="dashboard-section activity-section">

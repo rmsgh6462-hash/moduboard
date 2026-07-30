@@ -102,7 +102,7 @@ export async function createBoardAction(
       group_id: groupId,
       created_by: profile.id,
       description,
-      layout: formData.get("layout") === "column" ? "column" : "brick",
+      layout: formData.get("layout") === "column" ? "column" : formData.get("layout") === "mindmap" ? "mindmap" : "brick",
       sort_order: formData.get("sortOrder") === "oldest" ? "oldest" : "newest",
       is_locked: formData.get("isLocked") === "on",
       is_hidden: formData.get("isHidden") === "on",

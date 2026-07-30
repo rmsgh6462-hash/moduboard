@@ -28,7 +28,7 @@ export type Board = {
   created_by: string;
   created_at: string;
   description: string;
-  layout: "brick" | "column";
+  layout: "brick" | "column" | "mindmap";
   sort_order: "oldest" | "newest";
   is_locked: boolean;
   is_hidden: boolean;
@@ -59,6 +59,8 @@ export type Post = {
   attachment_url: string | null;
   attachment_name: string | null;
   attachment_type: string | null;
+  media_type: "image" | "video" | "mindmap" | null;
+  media_position: "top" | "bottom";
 };
 
 export type BoardColumn = {
@@ -135,7 +137,7 @@ type Tables = {
       created_by: string;
       created_at?: string;
       description?: string;
-      layout?: "brick" | "column";
+      layout?: "brick" | "column" | "mindmap";
       sort_order?: "oldest" | "newest";
       is_locked?: boolean;
       is_hidden?: boolean;
@@ -156,7 +158,7 @@ type Tables = {
       created_by?: string;
       created_at?: string;
       description?: string;
-      layout?: "brick" | "column";
+      layout?: "brick" | "column" | "mindmap";
       sort_order?: "oldest" | "newest";
       is_locked?: boolean;
       is_hidden?: boolean;
@@ -211,6 +213,8 @@ type Tables = {
       attachment_url?: string | null;
       attachment_name?: string | null;
       attachment_type?: string | null;
+      media_type?: "image" | "video" | "mindmap" | null;
+      media_position?: "top" | "bottom";
     };
     Update: {
       id?: string;
@@ -228,6 +232,8 @@ type Tables = {
       attachment_url?: string | null;
       attachment_name?: string | null;
       attachment_type?: string | null;
+      media_type?: "image" | "video" | "mindmap" | null;
+      media_position?: "top" | "bottom";
     };
     Relationships: [
       {

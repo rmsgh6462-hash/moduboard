@@ -2,6 +2,7 @@
 import { BoardCanvas } from "@/components/board/board-canvas";
 import { BoardToolbar } from "@/components/board/board-toolbar";
 import { ColumnBoard } from "@/components/board/column-board";
+import { MindmapBoard } from "@/components/board/mindmap-board";
 import { requireProfile } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -45,13 +46,15 @@ export default async function BoardPage({ params }: PageProps) {
 
   const subtitle = `${group.school_name} ${group.grade}학년 ${group.class_num}반 · ${profile.name}`;
   // DB의 기존 brick 값을 UI 표준 layoutType인 grid로 정규화합니다.
-  const layoutType: "column" | "grid" = board.layout === "column" ? "column" : "grid";
+  const layoutType: "column" | "grid" | "mindmap" = board.layout === "column" ? "column" : board.layout === "mindmap" ? "mindmap" : "grid";
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <BoardToolbar title={board.title} subtitle={subtitle} />
       {layoutType === "column" ? (
         <ColumnBoard board={board} group={group} profile={profile} columns={columns ?? []} initialPosts={posts ?? []} />
+      ) : layoutType === "mindmap" ? (
+        <MindmapBoard board={board} group={group} profile={profile} initialPosts={posts ?? []} />
       ) : (
         <BoardCanvas boardId={board.id} boardTitle={board.title} group={group} profile={profile} initialPosts={posts ?? []} />
       )}
