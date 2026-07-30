@@ -8,6 +8,7 @@ export type Group = {
   grade: number;
   class_num: number;
   created_at: string;
+  point_name: string;
 };
 
 export type UserProfile = {
@@ -19,6 +20,7 @@ export type UserProfile = {
   gender: Gender | null;
   login_id: string | null;
   created_at: string;
+  points: number;
 };
 
 export type Board = {
@@ -68,6 +70,16 @@ export type BoardColumn = {
 };
 
 type Tables = {
+  point_transactions: {
+    Row: { id: string; group_id: string; student_id: string; teacher_id: string; amount: number; reason: string; created_at: string };
+    Insert: { id?: string; group_id: string; student_id: string; teacher_id: string; amount: number; reason?: string; created_at?: string };
+    Update: { amount?: number; reason?: string };
+    Relationships: [
+      { foreignKeyName: "point_transactions_group_id_fkey"; columns: ["group_id"]; isOneToOne: false; referencedRelation: "groups"; referencedColumns: ["id"] },
+      { foreignKeyName: "point_transactions_student_id_fkey"; columns: ["student_id"]; isOneToOne: false; referencedRelation: "users"; referencedColumns: ["id"] },
+      { foreignKeyName: "point_transactions_teacher_id_fkey"; columns: ["teacher_id"]; isOneToOne: false; referencedRelation: "users"; referencedColumns: ["id"] }
+    ];
+  };
   groups: {
     Row: Group;
     Insert: {
@@ -77,6 +89,7 @@ type Tables = {
       grade: number;
       class_num: number;
       created_at?: string;
+      point_name?: string;
     };
     Update: {
       id?: string;
@@ -85,6 +98,7 @@ type Tables = {
       grade?: number;
       class_num?: number;
       created_at?: string;
+      point_name?: string;
     };
     Relationships: [
       {
@@ -107,6 +121,7 @@ type Tables = {
       gender?: Gender | null;
       login_id?: string | null;
       created_at?: string;
+      points?: number;
     };
     Update: {
       id?: string;
@@ -117,6 +132,7 @@ type Tables = {
       gender?: Gender | null;
       login_id?: string | null;
       created_at?: string;
+      points?: number;
     };
     Relationships: [
       {

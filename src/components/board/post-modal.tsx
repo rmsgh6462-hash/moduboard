@@ -305,7 +305,7 @@ export function PostModal({
                 <input
                   ref={galleryInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,video/*"
                   className="hidden"
                   onChange={(e) => {
                     void handleFile(e.target.files?.[0]);

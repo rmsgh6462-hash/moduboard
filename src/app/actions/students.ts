@@ -170,3 +170,33 @@ export async function deleteStudentAction(
   revalidatePath("/teacher");
   return { ok: true, message: "학생 계정을 삭제했습니다." };
 }
+
+export async function setPointNameAction(pointName: string): Promise<ActionResult> {
+  const profile = await requireTeacher();
+  const groupId = profile.group_id ?? profile.group?.id;
+  const name = pointName.trim();
+  if (!groupId) return { ok: false, message: "학급 그룹이 없습니다." };
+  if (!name || name.length > 12) return { ok: false, message: "포인트 이름은 1~12자로 입력해 주세요." };
+  const admin = createAdminClient();
+  const { error } = await admin.from("groups").update({ point_name: name }).eq("id", groupId).eq("teacher_id", profile.id);
+  if (error) return { ok: false, message: error.message };
+  revalidatePath("/teacher"); revalidatePath("/my-room");
+  return { ok: true, message: `포인트 이름을 '${name}'(으)로 바꿨습니다.` };
+}
+
+export async function grantStudentPointsAction(studentId: string, amount: number, reason: string): Promise<ActionResult> {
+  const profile = await requireTeacher();
+  const groupId = profile.group_id ?? profile.group?.id;
+  if (!groupId) return { ok: false, message: "학급 그룹이 없습니다." };
+  if (!Number.isInteger(amount) || amount < 1 || amount > 100000) return { ok: false, message: "1~100,000 사이의 정수를 입력해 주세요." };
+  const admin = createAdminClient();
+  const { data: student } = await admin.from("users").select("id,name,points").eq("id", studentId).eq("group_id", groupId).eq("role", "student").maybeSingle();
+  if (!student) return { ok: false, message: "우리 반 학생을 찾을 수 없습니다." };
+  const next = (student.points ?? 0) + amount;
+  const { error } = await admin.from("users").update({ points: next }).eq("id", student.id);
+  if (error) return { ok: false, message: error.message };
+  const { error: ledgerError } = await admin.from("point_transactions").insert({ group_id: groupId, student_id: student.id, teacher_id: profile.id, amount, reason: reason.trim() || "교사 직접 지급" });
+  if (ledgerError) return { ok: false, message: `포인트는 지급했지만 기록 저장에 실패했습니다: ${ledgerError.message}` };
+  revalidatePath("/teacher"); revalidatePath("/my-room");
+  return { ok: true, message: `${student.name} 학생에게 ${amount.toLocaleString()}포인트를 지급했습니다.` };
+}

@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, Combine, Crown, Files, MessageSquareText, Pencil, Sparkles, ThumbsUp, Trophy, X } from "lucide-react";
 import { PhaseStepper } from "@/components/phase-stepper";
 import { DiscussionPostEditor } from "@/components/discussion-post-editor";
@@ -17,6 +17,7 @@ const phases: Phase[] = [
 export function DiscussionModule({ currentUser, role, groupId, initialCanCreateTopic = false }: { currentUser: ActivityStudent; role: "teacher" | "student"; groupId: string; initialCanCreateTopic?: boolean }) {
   const engine = usePhasedActivity(phases); const [canCreateTopic, setCanCreateTopic] = useState(initialCanCreateTopic); const [topN, setTopN] = useState(3); const [ideas, setIdeas] = useState<DiscussionIdea[]>([]); const [shortlisted, setShortlisted] = useState<string[]>([]); const [finalVotes, setFinalVotes] = useState<Record<string, string>>({}); const [winner, setWinner] = useState<string>();
   const topic: DiscussionTopic = { id: "discussion-main", title: "우리 학교 쉼터를 어떻게 바꾸면 좋을까요?", phases, currentPhase: engine.phaseIndex, phaseEndsAt: new Date(engine.endsAt).toISOString(), shortlistCount: topN, ideas, shortlistedIds: shortlisted, finalVotes, winnerId: winner };
+  useEffect(() => { if (engine.phaseIndex === 2 && !shortlisted.length) setShortlisted([...ideas].sort((a, b) => b.votes.length - a.votes.length).slice(0, topN).map((idea) => idea.id)); }, [engine.phaseIndex]);
   function addIdea(title: string, contentBlocks: DiscussionContentBlock[]) { const id=crypto.randomUUID(); const content = contentBlocks.filter((block) => block.type === "text").map((block) => block.content).filter(Boolean).join("\n\n"); setIdeas((all) => [{ id, authorId: currentUser.id, authorName: currentUser.name, title, content, contentBlocks, votes: [] }, ...all]); recordPointActivity(currentUser.id,"discussionPost",id); }
   function voteIdea(id: string) { setIdeas((all) => all.map((idea) => ({ ...idea, votes: idea.id === id ? Array.from(new Set([...idea.votes, currentUser.id])) : idea.votes.filter((v) => v !== currentUser.id) }))); }
   function advance() { if (engine.phaseIndex === 1) setShortlisted([...ideas].sort((a, b) => b.votes.length - a.votes.length).slice(0, topN).map((i) => i.id)); if (engine.phaseIndex === 2 && !shortlisted.length) setShortlisted(ideas.slice(0, topN).map((i) => i.id)); if (engine.phaseIndex === 3) { const counts = shortlisted.map((id) => ({ id, count: Object.values(finalVotes).filter((v) => v === id).length })).sort((a, b) => b.count - a.count); setWinner(counts[0]?.id); } engine.advance(); }

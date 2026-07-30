@@ -3,6 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { BoardCreatePanel } from "@/components/teacher/board-create-panel";
 import { CreateGroupForm } from "@/components/teacher/create-group-form";
 import { StudentRosterPanel } from "@/components/teacher/student-roster-panel";
+import { PointManagerPanel } from "@/components/teacher/point-manager-panel";
 import { requireTeacher } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import type { Board, UserProfile } from "@/types/database";
@@ -71,6 +72,7 @@ export default async function TeacherPage() {
               students={students}
               suggestedCode={suggestedCode}
             />
+            <PointManagerPanel students={students} initialPointName={group?.point_name ?? "포인트"} />
             <BoardCreatePanel boards={boards} students={students} />
           </>
         ) : null}
