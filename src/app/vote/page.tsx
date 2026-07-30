@@ -1,4 +1,14 @@
-import { AppShell } from "@/components/app-shell";
-import { ClassroomModule } from "@/components/classroom-module";
+﻿import { AppShell } from "@/components/app-shell";
+import { VoteCenter } from "@/components/vote-center";
 import { requireProfile } from "@/lib/auth/session";
-export default async function Page(){const p=await requireProfile();return <AppShell name={p.name} role={p.role}><ClassroomModule kind="vote" role={p.role}/></AppShell>;}
+import { createClient } from "@/lib/supabase/server";
+
+export default async function VotePage() {
+  const profile = await requireProfile();
+  const supabase = await createClient();
+  const groupId = profile.group_id ?? profile.group?.id;
+  const { data } = groupId ? await supabase.from("users").select("id,name,student_num").eq("group_id", groupId).eq("role", "student").order("student_num") : { data: [] };
+  const students = (data ?? []).map((student) => ({ id: student.id, name: student.name, studentNum: student.student_num }));
+  const currentUser = { id: profile.id, name: profile.name, studentNum: profile.student_num };
+  return <AppShell name={profile.name} role={profile.role}><VoteCenter currentUser={currentUser} role={profile.role} students={students} initialCanCreateVote={false} /></AppShell>;
+}

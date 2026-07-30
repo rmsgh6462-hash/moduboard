@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { Camera, ImagePlus, Loader2, Trash2, X } from "lucide-react";
@@ -45,6 +45,7 @@ export function PostModal({
   const titleId = useId();
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [color, setColor] = useState<string>(POST_COLORS[0]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -58,10 +59,12 @@ export function PostModal({
     if (!open) return;
     setError(null);
     if (post) {
+      setTitle(post.title ?? "");
       setContent(post.content);
       setColor(post.color);
       setImageUrl(post.image_url);
     } else {
+      setTitle("");
       setContent("");
       setColor(POST_COLORS[Math.floor(Math.random() * POST_COLORS.length)]);
       setImageUrl(null);
@@ -90,10 +93,12 @@ export function PostModal({
 
   function handleSave() {
     setError(null);
+    if (!title.trim()) { setError("제목을 입력해 주세요."); return; }
     startTransition(async () => {
       if (mode === "create") {
         const result = await createPostAction({
           boardId,
+          title,
           content,
           color,
           imageUrl,
@@ -113,7 +118,8 @@ export function PostModal({
       const result = await updatePostAction({
         postId: post.id,
         boardId,
-        content,
+        title,
+          content,
         color,
         imageUrl,
       });
@@ -178,6 +184,20 @@ export function PostModal({
           {post ? (
             <p className="text-xs text-muted">작성자 · {post.author_name}</p>
           ) : null}
+
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium">제목 <b className="text-red-500">필수</b></span>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              readOnly={readOnly}
+              required
+              maxLength={100}
+              placeholder="글 제목을 입력하세요"
+              className="touch-target w-full rounded-2xl border border-border px-4 text-base font-semibold outline-none ring-brand focus:ring-2 read-only:bg-background"
+            />
+          </label>
+
 
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">내용</span>

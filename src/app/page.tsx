@@ -1,139 +1,49 @@
-import type { ReactNode } from "react";
 import Link from "next/link";
-import { BookOpen, LogIn, Smartphone, Users } from "lucide-react";
-import { getCurrentProfile } from "@/lib/auth/session";
+import { ArrowRight, Bell, CalendarDays, CheckCircle2, Clock3, LayoutGrid, Lightbulb, LogIn, MessageSquareText, Sparkles, Vote } from "lucide-react";
 import { logoutAction } from "@/app/actions/auth";
+import { getCurrentProfile } from "@/lib/auth/session";
+
+const features = [
+  { href: "/boards", icon: LayoutGrid, emoji: "📌", title: "모두의 게시판", description: "기둥형·벽돌형 포스트잇에 생각을 자유롭게 붙여요.", tone: "mint" },
+  { href: "/vote", icon: Vote, emoji: "🗳️", title: "모두의 투표", description: "친구들과 쉽고 재미있게 우리 반의 선택을 모아요.", tone: "yellow" },
+  { href: "/debate", icon: MessageSquareText, emoji: "⚔️", title: "모두의 토론", description: "찬성과 반대 팀이 근거를 모아 단계별로 토론해요.", tone: "rose" },
+  { href: "/discussion", icon: Lightbulb, emoji: "💡", title: "모두의 토의", description: "다양한 아이디어를 모으고 투표로 최종 결정해요.", tone: "lavender" },
+] as const;
+
+const activities = [
+  { href: "/vote", type: "진행 중인 투표", title: "우리 반 체육 시간에 하고 싶은 활동은?", meta: "오늘 오후 3시 마감", emoji: "🗳️", progress: 68, tone: "blue" },
+  { href: "/debate", type: "2단계 · 자료 모으기", title: "학교에서 휴대폰을 사용해도 될까요?", meta: "마감까지 45분", emoji: "⚔️", progress: 42, tone: "rose" },
+  { href: "/discussion", type: "1단계 · 의견 제출", title: "우리 교실을 더 즐겁게 만드는 방법", meta: "새 의견 7개", emoji: "💡", progress: 25, tone: "yellow" },
+] as const;
 
 export default async function Home() {
   const profile = await getCurrentProfile();
+  const className = profile?.group ? `${profile.group.grade}학년 ${profile.group.class_num}반` : "우리 반";
+  const identity = profile ? (profile.role === "teacher" ? `${profile.name} 선생님` : `${profile.name} 학생`) : "모두보드 친구";
 
-  return (
-    <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-surface/90 px-4 py-3 pt-[calc(0.75rem+var(--safe-top))] backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
-          <p className="text-lg font-bold tracking-tight text-brand">모두보드</p>
-          {profile ? (
-            <div className="flex items-center gap-2">
-              <Link
-                href={profile.role === "teacher" ? "/teacher" : "/boards"}
-                className="touch-target inline-flex items-center justify-center rounded-xl bg-brand px-4 text-sm font-semibold text-white"
-              >
-                {profile.role === "teacher" ? "학급 관리" : "내 보드"}
-              </Link>
-              <form action={logoutAction}>
-                <button
-                  type="submit"
-                  className="touch-target rounded-xl border border-border px-3 text-sm font-medium"
-                >
-                  로그아웃
-                </button>
-              </form>
-            </div>
-          ) : (
-            <Link
-              href="/login"
-              className="touch-target inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-white"
-            >
-              <LogIn className="size-4" aria-hidden />
-              로그인
-            </Link>
-          )}
-        </div>
-      </header>
+  return <div className="dashboard-shell page-enter">
+    <header className="dashboard-header"><div className="dashboard-header-inner">
+      <Link href="/" className="dashboard-logo bounce-hover" aria-label="모두보드 메인"><span>모</span><b>모두보드</b><em>🏫</em></Link>
+      <nav className="dashboard-nav" aria-label="주요 메뉴">{features.map(({ href, title }) => <Link key={href} href={href}>{title.replace("모두의 ", "")}</Link>)}</nav>
+      <div className="dashboard-account">{profile ? <><span className={`role-pill ${profile.role}`}><i>{profile.role === "teacher" ? "✏️" : "🎒"}</i>{className} · {identity}</span><form action={logoutAction}><button type="submit" className="dashboard-logout">로그아웃</button></form></> : <Link href="/login" className="dashboard-login bounce-hover"><LogIn /> 로그인</Link>}</div>
+    </div></header>
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-8 pb-[calc(2rem+var(--safe-bottom))]">
-        <section className="rounded-3xl bg-brand px-6 py-10 text-white shadow-sm">
-          <p className="mb-2 text-sm font-medium text-teal-100">학급 패들렛</p>
-          <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
-            스마트폰으로도
-            <br />
-            바로 붙이는 의견 보드
-          </h1>
-          <p className="mt-4 max-w-md text-base leading-relaxed text-teal-50">
-            {profile
-              ? `${profile.name} 님, 환영합니다. 이어서 보드로 이동해 보세요.`
-              : "교사와 학생 60명 규모 수업에서 터치 드래그·사진 첨부·실시간 동기화를 지원합니다."}
-          </p>
-        </section>
+    <main className="dashboard-main">
+      <section className="welcome-card">
+        <div className="welcome-copy"><span className="welcome-kicker"><Sparkles /> TODAY&apos;S CLASS</span><h1>👋 반가워요, {profile?.name ?? "모두들"}!</h1><p>오늘도 친구들과 즐겁게 생각을 나누고, 멋진 의견을 만들어 보세요.</p><div className="welcome-tags"><span><CalendarDays /> 오늘의 학급 활동</span><span><CheckCircle2 /> 오늘 할 일 3개</span></div></div>
+        <aside className="class-notice bounce-hover"><div><Bell /><span><small>선생님 알림</small><b>오늘의 학급 공지</b></span></div><p>토론 자료를 읽고 내 생각을 한 문장으로 정리해 보세요!</p><span className="notice-doodle">✏️</span></aside>
+      </section>
 
-        <section className="grid gap-3 sm:grid-cols-3">
-          <FeatureCard
-            icon={<Users className="size-5" aria-hidden />}
-            title="학급 그룹"
-            description="학교·학년·반으로 그룹을 만들고 학생 명단을 일괄 등록합니다."
-          />
-          <FeatureCard
-            icon={<Smartphone className="size-5" aria-hidden />}
-            title="모바일 터치"
-            description="손가락으로 포스트잇을 옮기고, 카메라·갤러리로 사진을 첨부합니다."
-          />
-          <FeatureCard
-            icon={<BookOpen className="size-5" aria-hidden />}
-            title="자동 로그인"
-            description="최초 1회 로그인 후 세션이 유지되어 수업 중 바로 입장합니다."
-          />
-        </section>
+      <section className="dashboard-section">
+        <div className="dashboard-title"><div><span>EXPLORE TOGETHER</span><h2>오늘은 무엇을 해볼까요? 🚀</h2></div><p>카드를 눌러 바로 참여해 보세요.</p></div>
+        <div className="feature-grid">{features.map(({ href, icon: Icon, emoji, title, description, tone }) => <Link key={href} href={href} className={`feature-entry ${tone} bounce-hover`}><div className="feature-icon"><Icon /><span>{emoji}</span></div><div><h3>{title}</h3><p>{description}</p></div><span className="feature-arrow"><ArrowRight /></span></Link>)}</div>
+      </section>
 
-        <section className="flex flex-col gap-3 sm:flex-row">
-          {profile ? (
-            <>
-              <Link
-                href="/boards"
-                className="touch-target inline-flex flex-1 items-center justify-center rounded-2xl bg-brand px-5 text-base font-semibold text-white"
-              >
-                보드 입장
-              </Link>
-              {profile.role === "teacher" ? (
-                <Link
-                  href="/teacher"
-                  className="touch-target inline-flex flex-1 items-center justify-center rounded-2xl border border-border bg-surface px-5 text-base font-semibold text-foreground"
-                >
-                  교사용 그룹 관리
-                </Link>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="touch-target inline-flex flex-1 items-center justify-center rounded-2xl bg-brand px-5 text-base font-semibold text-white"
-              >
-                학생·교사 로그인
-              </Link>
-              <Link
-                href="/signup"
-                className="touch-target inline-flex flex-1 items-center justify-center rounded-2xl border border-border bg-surface px-5 text-base font-semibold text-foreground"
-              >
-                교사 회원가입
-              </Link>
-            </>
-          )}
-        </section>
-
-        <p className="text-center text-sm text-muted">
-          5단계 완료 · Realtime · 모바일 최적화 · Vercel 배포 준비됨
-        </p>
-      </main>
-    </div>
-  );
-}
-
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-surface p-5">
-      <div className="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-brand-soft text-brand">
-        {icon}
-      </div>
-      <h2 className="text-base font-semibold text-foreground">{title}</h2>
-      <p className="mt-1 text-sm leading-relaxed text-muted">{description}</p>
-    </div>
-  );
+      <section className="dashboard-section activity-section">
+        <div className="dashboard-title"><div><span>KEEP GOING</span><h2>지금 참여할 수 있어요 🔥</h2></div><Link href="/boards">전체 활동 보기 <ArrowRight /></Link></div>
+        <div className="recent-carousel">{activities.map((activity) => <Link key={activity.title} href={activity.href} className={`recent-card ${activity.tone} bounce-hover`}><div className="recent-card-top"><span className="activity-emoji">{activity.emoji}</span><span className="live-dot">● {activity.type}</span></div><h3>{activity.title}</h3><div className="activity-meta"><Clock3 /><span>{activity.meta}</span><b>{activity.progress}%</b></div><i><em style={{ width: `${activity.progress}%` }} /></i></Link>)}</div>
+      </section>
+    </main>
+    <footer className="dashboard-footer"><b>모두보드 🏫</b><span>우리 반의 모든 생각이 반짝이는 곳</span></footer>
+  </div>;
 }

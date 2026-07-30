@@ -1,0 +1,7 @@
+﻿"use client";
+import { ChevronRight, Clock3, FastForward, ShieldCheck } from "lucide-react";
+import type { Phase } from "@/types/activities";
+export function PhaseStepper({ phases, current, secondsLeft, role, onAdvance, onDuration }: { phases: Phase[]; current: number; secondsLeft: number; role: "teacher" | "student"; onAdvance: () => void; onDuration: (minutes: number) => void }) {
+  const time = secondsLeft >= 86400 ? `${Math.ceil(secondsLeft / 86400)}일` : secondsLeft >= 3600 ? `${Math.floor(secondsLeft / 3600)}시간 ${Math.ceil(secondsLeft % 3600 / 60)}분` : `${Math.floor(secondsLeft / 60)}분 ${secondsLeft % 60}초`;
+  return <><div className="phase-stepper">{phases.map((p, i) => <div key={p.key} className={`${i === current ? "current" : ""} ${i < current ? "done" : ""}`}><span>{i < current ? "✓" : i + 1}</span><div><b>{p.label}</b><small>{p.description}</small></div>{i < phases.length - 1 ? <ChevronRight /> : null}</div>)}</div><div className="phase-control"><div><Clock3 /><span><b>{current + 1}단계 마감까지 {time} 남음</b><small>시간이 끝나면 다음 단계로 자동 전환돼요.</small></span></div>{role === "teacher" ? <div className="phase-teacher"><label>이 단계 시간 <select defaultValue={phases[current].durationMinutes} onChange={(e) => onDuration(Number(e.target.value))}><option value="1">1분</option><option value="15">15분</option><option value="60">1시간</option><option value="1440">1일</option></select></label><button onClick={onAdvance}><FastForward />다음 단계로 강제 이동</button><em><ShieldCheck />슈퍼바이저 모드</em></div> : null}</div></>;
+}

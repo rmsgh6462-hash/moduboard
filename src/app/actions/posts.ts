@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "@/app/actions/auth";
@@ -68,7 +68,7 @@ export async function createPostAction(input: {
   }
 
   const content = input.content.trim();
-  if (!content && !input.imageUrl && !input.attachmentUrl) {
+  if (!input.title?.trim() && !content && !input.imageUrl && !input.attachmentUrl) {
     return { ok: false, message: "내용 또는 사진을 추가해 주세요." };
   }
 
@@ -108,6 +108,7 @@ export async function updatePostAction(input: {
   postId: string;
   boardId: string;
   content: string;
+  title?: string;
   color: string;
   imageUrl?: string | null;
 }): Promise<ActionResult & { post?: Post }> {
@@ -132,7 +133,7 @@ export async function updatePostAction(input: {
   }
 
   const content = input.content.trim();
-  if (!content && !input.imageUrl) {
+  if (!input.title?.trim() && !content && !input.imageUrl) {
     return { ok: false, message: "내용 또는 사진을 추가해 주세요." };
   }
 
@@ -140,6 +141,7 @@ export async function updatePostAction(input: {
     .from("posts")
     .update({
       content,
+      title: input.title?.trim() ?? existing.title ?? "",
       color: input.color,
       image_url: input.imageUrl ?? null,
     })

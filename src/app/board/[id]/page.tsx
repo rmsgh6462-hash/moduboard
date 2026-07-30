@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+﻿import { notFound, redirect } from "next/navigation";
 import { BoardCanvas } from "@/components/board/board-canvas";
 import { BoardToolbar } from "@/components/board/board-toolbar";
 import { ColumnBoard } from "@/components/board/column-board";
@@ -44,11 +44,13 @@ export default async function BoardPage({ params }: PageProps) {
   ]);
 
   const subtitle = `${group.school_name} ${group.grade}학년 ${group.class_num}반 · ${profile.name}`;
+  // DB의 기존 brick 값을 UI 표준 layoutType인 grid로 정규화합니다.
+  const layoutType: "column" | "grid" = board.layout === "column" ? "column" : "grid";
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <BoardToolbar title={board.title} subtitle={subtitle} />
-      {board.layout === "column" ? (
+      {layoutType === "column" ? (
         <ColumnBoard board={board} group={group} profile={profile} columns={columns ?? []} initialPosts={posts ?? []} />
       ) : (
         <BoardCanvas boardId={board.id} boardTitle={board.title} group={group} profile={profile} initialPosts={posts ?? []} />
